@@ -27,7 +27,8 @@ exports.getAllProducts = cathAsyncError(async(req, res) =>{
     const products = await apiFeatures.query;
     res.status(200).json({
         success: true,
-        products
+        products,
+        productCount
     });
 });
 
