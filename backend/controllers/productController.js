@@ -15,20 +15,27 @@ exports.createProduct = cathAsyncError(async (req, res, next)=>{
 });
 
 //Get all product
-exports.getAllProducts = cathAsyncError(async(req, res) =>{
+exports.getAllProducts = cathAsyncError(async(req, res, next) =>{
+    const resultPerPage = 8;
+    const productsCount = await Product.countDocuments();
 
-    const resultPerPage = 5;
-    const productCount = await Product.countDocuments();
-
-    const apiFeatures = new ApiFeatures(Product.find(), req.query)
+    const apiFeature = new ApiFeatures(Product.find(), req.query)
     .search()
-    .filter()
-    .pagination(resultPerPage);
-    const products = await apiFeatures.query;
+    .filter();
+
+    let products = await apiFeature.query;
+
+    let filteredProductsCount = products.length;
+
+    apiFeature.pagination(resultPerPage);
+    
+    products = await apiFeature.query.clone();
     res.status(200).json({
         success: true,
         products,
-        productCount
+        productsCount,
+        resultPerPage,
+        filteredProductsCount
     });
 });
 
@@ -41,7 +48,6 @@ exports.getProductDetails = cathAsyncError(async(req, res, next)=>{
     res.status(200).json({
         success: true,
         product,
-        productCount
     });
 });
 
