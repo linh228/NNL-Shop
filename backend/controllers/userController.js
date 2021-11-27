@@ -12,14 +12,17 @@ exports.registerUser = cathAsyncError(async(req, res, next)=>{
 
     const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
         folder: "avatars",
+        width: 150,
+        crop: "scale"
     });
 
     const {name, email, password} = req.body;
     const user = await User.create({
         name, email, password,
         avatar:{
-            public_id: "public id",
-            url: "url"
+            public_id: myCloud.public_id,
+            url: myCloud.secure_url,
+
         }
     });
 
@@ -71,7 +74,7 @@ exports.forgotPassword = cathAsyncError(async(req, res, next)=>{
     //Get resetPassword Token
     const resetToken = user.getResetPasswordToken();
     await user.save({validateBeforeSave: false});
-    const resetPasswordUrl = `${req.protocol}://${req.get("host")}/api/v1/password/reset/${resetToken}`;
+    const resetPasswordUrl = `${process.env.FRONTEND_URL}/password/reset/${resetToken}`;
     const message = `Truy cập vào đường dẫn để đặt lại mật khẩu: \n\n ${resetPasswordUrl}
     \nNếu bạn không yêu cầu đặt lại mật khẩu vui lòng bỏ qua tin nhắn này`;
     try {
@@ -152,9 +155,25 @@ exports.updateProfile = cathAsyncError(async(req, res, next)=>{
     const newUserData={
         name: req.body.name,
         email: req.body.email
-    }
+    };
 
-    //We will add cloudinary later
+    if(req.body.avatar !== ""){
+        const user = await User.findById(req.user.id);
+        const imageId = user.avatar.public_id;
+
+        await cloudinary.v2.uploader.destroy(imageId);
+
+        const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+            folder: "avatars",
+            width: 150,
+            crop: "scale"
+        });
+        newUserData.avatar = {
+            public_id: myCloud.public_id,
+            url: myCloud.secure_url
+        };
+    }
+    
     const user = await User.findByIdAndUpdate(req.user.id, newUserData, {
         new: true,
         runValidators: true,
@@ -197,8 +216,11 @@ exports.updateUserRole = cathAsyncError(async(req, res, next)=>{
         role: req.body.role
     }
 
-    //We will add cloudinary later
-    const user = await User.findByIdAndUpdate(req.params.id, newUserData, {
+    let user = User.findById(req.params.id);
+    if(!user){
+        return next( new ErrorHandle(`User does not exist with Id: ${req.params.id}`, 400))
+    }
+    user = await User.findByIdAndUpdate(req.params.id, newUserData, {
         new: true,
         runValidators: true,
         useFindAndModify: false,
@@ -218,6 +240,9 @@ exports.deleteUser = cathAsyncError(async(req, res, next)=>{
     if(!user){
         return next(new ErrorHandle(`User is not exist with Id: ${req.params.id}`, 400));
     }
+
+    const imageId = user.avatar.public_id;
+    await cloudinary.v2.uploader.destroy(imageId);
 
     await user.remove();
     

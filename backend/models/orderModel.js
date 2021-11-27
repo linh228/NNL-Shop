@@ -1,105 +1,101 @@
 const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema({
-    shippingInfo:{
-        address: {
+    shippingInfo: {
+        address: { 
             type: String,
-            required: true
+            required: true,
         },
-        city: {
+        province: { 
             type: String,
-            required: true
+            required: true,
         },
-        state: {
+        district: { 
             type: String,
-            required: true
+            required: true,
         },
-        country: {
+        ward: { 
             type: String,
-            required: true
+            required: true,
         },
-        pinCode:{
+        phoneNo: { 
             type: Number,
-            required: true
-        },
-        phoneNo:{
-            type: Number,
-            required: true
+            required: true,
         },
     },
-    orderItems:[
-        {
-            name: {
+    orderItems: [
+        { 
+            name: { 
                 type: String,
-                required: true
+                required: true,
             },
-            price:{
+            price: { 
                 type: Number,
-                required: true
+                required: true,
             },
-            quantity:{
+            quantity: { 
                 type: Number,
-                required: true
+                required: true,
             },
-            image:{
+            image: { 
                 type: String,
-                required: true
+                required: true,
             },
-            product:{
+            product: { 
                 type: mongoose.Schema.ObjectId,
                 ref: "Product",
-                required: true
+                required: true,
             },
         },
     ],
-    user:{
+    user: {
         type: mongoose.Schema.ObjectId,
         ref: "User",
-        required: true
+        required: true,
     },
-    paymentInfo:{
-        id:{
+    paymentInfo: {
+        id: {
             type: String,
-            required: true
+            required: true,
         },
-        status:{
+        status: {
             type: String,
-            required: true
+            required: true,
         },
     },
-    paidAt:{
+    paidAt: {
         type: Date,
         required: true,
     },
-    itemsPrice:{
+    itemsPrice: {
         type: Number,
-        default: 0,
         required: true,
+        default: 0,
     },
-    taxPrice:{
+    taxPrice: {
         type: Number,
-        default: 0,
         required: true,
+        default: 0,
     },
-    shippingPrice:{
+    shippingPrice: {
         type: Number,
-        default: 0,
         required: true,
+        default: 0,
     },
-    totalPrice:{
+    totalPrice: {
         type: Number,
-        default: 0,
         required: true,
+        default: 0,
     },
-    orderStatus:{
+    orderStatus: {
         type: String,
         required: true,
-        default:"Processing"
+        default: "Processing",
     },
     deliveredAt: Date,
-    createdAt:{
+    createAt: {
         type: Date,
-        default: Date.now()
+        default: Date.now,
     },
 });
 
